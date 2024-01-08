@@ -9,6 +9,11 @@ This repository contains proof-of-concept scripts for CVE-2023-45866, ~CVE-2024-
 | [Android Keystroke Injection](#android-keystroke-injection) | Force-pairs a virtual Bluetooth keyboard with a vulnerable Android device and injects 10 seconds of `tab` keypresses. |
 | [Linux Keystroke Injection](#linux-keystroke-injection) | Force-pairs a virtual Bluetooth keyboard with a Linux host and injects 10 seconds of `tab` keypresses. |
 | [macOS Keystroke Injection](#macos-keystroke-injection) | Force-pairs a virtual Bluetooth keyboard with a macOS host and injects keystrokes to open a web browser and perform a Google search. |
+| TODO iPhone Keystroke Injection | |
+| TODO Windows Keystroke Injection | |
+| TODO Magic Keyboard Link Key via Lightning Port | |
+| TODO Magic Keyboard Link Key via Bluetooth | |
+| TODO Magic Keyboard Link Key via USB Port on the Mac | |
 
 ## Dependencies
 
