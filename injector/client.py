@@ -36,22 +36,27 @@ class L2CAPClient:
         self.connected = False
     log.error("[TX-%d] ERROR! timed out sending %s" % (self.port, binascii.hexlify(data).decode()))
 
-  def recv(self):
-    raw = None
-    if not self.connected:
-      return None
-    if self.sock is None:
-      return None
-    try:
-      raw = self.sock.recv(64)
-      if len(raw) == 0:
-        self.connected = False
+  def recv(self, timeout=0):
+    start = time.time()
+    while True:
+      raw = None
+      if not self.connected:
         return None
-      log.debug("[RX-%d] %s" % (self.port, binascii.hexlify(raw).decode()))
-    except bluetooth.btcommon.BluetoothError as ex:
-      if ex.errno != 11: # no data available
-        raise ex
-    return raw
+      if self.sock is None:
+        return None
+      try:
+        raw = self.sock.recv(64)
+        if len(raw) == 0:
+          self.connected = False
+          return None
+        log.debug("[RX-%d] %s" % (self.port, binascii.hexlify(raw).decode()))
+      except bluetooth.btcommon.BluetoothError as ex:
+        if ex.errno != 11: # no data available
+          raise ex
+        else:
+          if (time.time() - start) < timeout:
+            continue
+      return raw
 
   def connect(self, timeout=None):
     log.debug("connecting to %s on port %d" % (self.addr, self.port))
