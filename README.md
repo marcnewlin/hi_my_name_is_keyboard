@@ -12,7 +12,7 @@ This repository contains proof-of-concept scripts for CVE-2023-45866, ~CVE-2024-
 | TODO iPhone Keystroke Injection | |
 | TODO Windows Keystroke Injection | |
 | [Magic Keyboard Link Key via Lightning Port](#magic-keyboard-link-key-via-lightning-port) | Reads the Bluetooth link key from the Lightning port on a Magic Keyboard. |
-| TODO Magic Keyboard Link Key via Bluetooth | |
+| [Magic Keyboard Link Key via Bluetooth](#magic-keyboard-link-key-via-bluetooth) | Reads the Bluetooth link key from the unauthenticated Bluetooth HID service on the Magic Keyboard. |
 | [Magic Keyboard Link Key via USB Port on the Mac](#magic-keyboard-link-key-via-usb-port-on-mac) | Reads the Bluetooth link key for a target Magic Keyboard by spoofing the keyboard over USB to its paired Mac. |
 
 ## Dependencies
