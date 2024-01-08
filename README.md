@@ -514,8 +514,6 @@ When the Magic Keyboard is plugged into the Mac, the Mac sends the Bluetooth lin
 
 The link key remains in memory until the Magic Keyboard is powered off, and can be read by an attacker with access to the lightning port on the keyboard.
 
-This attack can be mitigated by enabling Lockdown Mode on the Mac.
-
 #### Affected Versions
 
 The following Apple peripherals were tested and found vulnerable to this attack. No other peripherals were tested, so this list may be incomplete.
@@ -560,7 +558,7 @@ If an attacker knows the Bluetooth address and serial number of a target Magic K
 
 The PoC implements this attack by writing the target Bluetooth address and serial number to a donor keyboard, plugging the donor keyboard into the Mac, and then reading the link key off of the donor keyboard.
 
-This attack is mitigated my enabling Lockdown Mode on the Mac.
+This attack can be mitigated my enabling Lockdown Mode on the Mac.
 
 #### Affected Versions
 
