@@ -514,6 +514,8 @@ The link key remains in memory until the Magic Keyboard is powered off, and can 
 
 #### Affected Versions
 
+Apple started rolling out [Magic Keyboard patches](https://support.apple.com/en-us/HT214050) on 2024-01-09.
+
 The following Apple peripherals were tested and found vulnerable to this attack. No other peripherals were tested, so this list may be incomplete.
 
 | Product Name | Model Number |
@@ -559,6 +561,8 @@ The PoC implements this attack by writing the target Bluetooth address and seria
 This attack can be mitigated my enabling Lockdown Mode on the Mac.
 
 #### Affected Versions
+
+Apple started rolling out [Magic Keyboard patches](https://support.apple.com/en-us/HT214050) on 2024-01-09.
 
 macOS versions 12, 13 and 14 were tested and found to be vulnerable to this attack. Earlier versions of macOS were not tested.
 
@@ -621,6 +625,8 @@ The unauthenticated Bluetooth HID service becomes available when the Magic Keybo
 This is a zero-click attack with a timing component. The PoC does not implement a timing trigger, and instead attempts to connect to the Magic Keyboard in a loop until successful.
 
 #### Affected Versions
+
+Apple started rolling out [Magic Keyboard patches](https://support.apple.com/en-us/HT214050) on 2024-01-09.
 
 The following Apple peripherals were tested and found vulnerable to this attack. No other peripherals were tested, so this list may be incomplete.
 
