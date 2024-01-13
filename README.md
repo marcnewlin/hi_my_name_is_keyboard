@@ -1,8 +1,6 @@
 # Hi, My Name is Keyboard
 
-**Please treat this repository as confidential until I make it public on 01/13/2023.**
-
-This repository contains proof-of-concept scripts for CVE-2023-45866, CVE-2024-21306, and CVE-2024-0230.
+This repository contains proof-of-concept scripts for CVE-2023-45866, CVE-2024-21306, and CVE-2024-0230. Additional details can be found in the [blog post](https://github.com/skysafe/reblog/blob/main/cve-2024-0230/README.md).
 
 | Proof of Concept | Description |
 |-|-|
@@ -19,7 +17,7 @@ This repository contains proof-of-concept scripts for CVE-2023-45866, CVE-2024-2
 
 The scripts are known to work on an Ubuntu 22.04 host with a Broadcom-based Bluetooth adapter.
 
-We primarily used this adapter: https://www.amazon.com/Kinivo-USB-Bluetooth-4-0-Compatible/dp/B007Q45EF4
+I primarily used this adapter: https://www.amazon.com/Kinivo-USB-Bluetooth-4-0-Compatible/dp/B007Q45EF4
 
 ```
 Bus 001 Device 026: ID 0a5c:21e8 Broadcom Corp. BCM20702A0 Bluetooth 4.0
