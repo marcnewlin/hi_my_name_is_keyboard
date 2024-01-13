@@ -2,15 +2,15 @@
 
 **Please treat this repository as confidential until I make it public on 01/13/2023.**
 
-This repository contains proof-of-concept scripts for CVE-2023-45866, ~CVE-2024-21306~, and CVE-2024-0230.
+This repository contains proof-of-concept scripts for CVE-2023-45866, CVE-2024-21306, and CVE-2024-0230.
 
 | Proof of Concept | Description |
 |-|-|
 | [Android Keystroke Injection](#android-keystroke-injection) | Force-pairs a virtual Bluetooth keyboard with a vulnerable Android device and injects 10 seconds of `tab` keypresses. |
 | [Linux Keystroke Injection](#linux-keystroke-injection) | Force-pairs a virtual Bluetooth keyboard with a Linux host and injects 10 seconds of `tab` keypresses. |
 | [macOS Keystroke Injection](#macos-keystroke-injection) | Force-pairs a virtual Bluetooth keyboard with a macOS host and injects keystrokes to open a web browser and perform a Google search. |
-| TODO iPhone Keystroke Injection | |
-| TODO Windows Keystroke Injection | |
+| [iOS Keystroke Injection](#ios-keystroke-injection) | Force-pairs a virtual Bluetooth keyboard with an iOS host and injects keystrokes to open a web browser and navigate to a URL. |
+| [Windows Keystroke Injection](windows-report.md) | Force-pairs a virtual Bluetooth keyboard with a Windows host and injects `tab` keypresses. |
 | [Magic Keyboard Link Key via Lightning Port](#magic-keyboard-link-key-via-lightning-port) | Reads the Bluetooth link key from the Lightning port on a Magic Keyboard. |
 | [Magic Keyboard Link Key via Bluetooth](#magic-keyboard-link-key-via-bluetooth) | Reads the Bluetooth link key from the unauthenticated Bluetooth HID service on the Magic Keyboard. |
 | [Magic Keyboard Link Key via USB Port on the Mac](#magic-keyboard-link-key-via-usb-port-on-mac) | Reads the Bluetooth link key for a target Magic Keyboard by spoofing the keyboard over USB to its paired Mac. |
@@ -745,4 +745,38 @@ Model     0    - Magic Keyboard
 BT Address     - 1c:57:dc:88:55:02
 Mac BT Address - 50:de:06:a8:e1:ca
 BT Link Key    - 05198fe8520ca45effbb233b5280b480
+```
+
+### iOS Keystroke Injection
+
+When an iPhone is attempting to connect to a paired Magic Keyboard over Bluetooth, an attacker can spoof the Magic Keyboard to the iPhone, pair a virtual Bluetooth keyboard, and inject keystrokes without user confirmation.
+
+This attack has a timing component, where the attacker must connect to the iPhone at the precise moment the iPhone attempts to connect to the Magic Keyboard.
+
+The included PoC fires when the iPhone attempts to connect to its paired Magic Keyboard. This uses the same SDP timing trigger as the macOS PoC, triggering when the iPhone is connecting to its paired Magic Keyboard. This is a zero-click attack that requires observing a user connect to their paired Magic Keyboard.
+
+#### Affected Versions
+
+- iOS 17 is vulnerable prior to 17.2
+- iOS 16 is vulnerable with no patch expected
+- iOS 15 and older were not tested
+
+#### Starting State
+
+- The iPhone is paired with a Magic Keyboard, and the keyboard is out of range or powered off.
+- When the user tries to connect to their Magic Keyboard, the PoC injects keystrokes to open a web browser and perform a Google search.
+
+#### Running the PoC
+
+**NOTE: BlueZ must be running in compatibility mode on the attacker machine for this PoC. The iPhone PoC script is found in iphone-poc.zip**
+
+```
+> ./iphone-poc.py
+usage: ./iphone-poc.py <hciX> <BT_ADDR_IPHONE> <BT_ADDR_KEYBOARD>
+```
+
+##### Invocation
+
+```
+./iphone-poc.py hci1 4C:20:B8:D6:63:45 1C:57:DC:88:55:02
 ```
