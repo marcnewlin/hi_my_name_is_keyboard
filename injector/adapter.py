@@ -28,7 +28,7 @@ class Adapter:
 
   def set_name(self, name):
     if self.adapter.Name != name:
-      run(["sudo", "hciconfig", self.iface, "name", name])
+      run(["sudo", "hciconfig", self.iface, "name", f"\"{name}\""])
       if name not in run(["hciconfig", self.iface, "name"]).decode():
         log.error("Unable to set adapter name, aborting.")
         sys.exit(1)
